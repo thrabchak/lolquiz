@@ -1,0 +1,15 @@
+{
+  "champion": {
+    "general_abilities": true,
+    "ability_cooldowns": false,
+  },
+  "items": {
+    "general_items": true
+  },
+  "summoner_spells": {
+    "cooldowns": true
+  },
+  "masteries": {
+    "descriptions" : true
+  }
+}
