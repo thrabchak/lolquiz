@@ -15,9 +15,9 @@ def createCard(question, answer, categories):
 
 class Card(object):
   """Base class for all Card types."""
-  question = ""
-  answer = ""
-  categories = []
+  self.question = ""
+  self.answer = ""
+  self.categories = []
 
   def __init__(self, question, answer, categories):
     self.question = question
@@ -32,7 +32,7 @@ class Card(object):
     categoriesList.pop()
     categoriesList.append(']')
     categoriesString = ''.join(categoriesList)
-    return '{"question": "{0}", "answer":"{1}","categories":{2}}'.format(question, answer, categoriesString)
+    return '{"question": "{0}", "answer":"{1}","categories":{2}}'.format(self.question, self.answer, self.categoriesString)
 
   def save(self):
     # Save flash card to default location

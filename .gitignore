@@ -1,2 +1,2 @@
-/Data
-riot_api_key.txt
+__pycache__/
+.cache/
