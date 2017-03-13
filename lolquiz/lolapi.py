@@ -71,10 +71,14 @@ class LolApi(object):
     '''Returns a list of all the active champions'''
     try:
       championJson = self.fileSystemService.readJsonFile(self.CHAMPION_FILE)
-      return championJson["data"]
+      champs = []
+      for champKey, champValue in championJson["data"].items():
+        champs.append(Champion(champValue))
+      return champs
     except Exception as e:
       print("Error reading champion data.")
-      return []
+      print(e)
+      raise e
 
   def getItems(self):
     '''Returns a list of all the active items'''
@@ -103,6 +107,61 @@ class SummonerSpell(object):
     mins = int(cooldown // 60)
     secs =  int(cooldown % 60)
     return "{0} mins {1} secs".format(mins, secs) 
+
+  def getName(self):
+    return self.jsonData["name"]
+
+class Champion(object):
+
+  def __init__(self, jsonData):
+    self.jsonData = jsonData
+
+  def getAbilities(self):
+    '''Get list of champion's abilities (includes passive)'''
+    abilities = []
+    passive = Ability(self.jsonData["passive"])
+    abilities.append(passive)
+    for spell in self.jsonData["spells"]:
+        abilities.append(Ability(spell))
+    return abilities
+
+  def getAbilitiesAsStrings(self):
+
+    abilities = self.getAbilities()
+    stringList = []
+    for ability in abilities:
+      stringList.append(ability.getName())
+    return stringList
+
+  def getStats(self):
+    return self.jsonData["stats"]
+
+  def getAllyTips(self):
+    '''Returns a list of strings containing helpful advice'''
+    return self.jsonData["allytips"]
+
+  def getEnemyTips(self):
+    '''Returns a list of strings containing cautionary advice'''
+    return self.jsonData["enemytips"]
+
+  def getName(self):
+    return self.jsonData["name"]
+
+class Ability():
+
+  def __init__(self, jsonData):
+    self.jsonData = jsonData
+
+  def getName(self):
+    return self.jsonData["name"]
+
+  def description(self):
+    return str(self.jsonData["sanitizedDescription"])
+
+class Item(object):
+
+  def __init__(self, jsonData):
+    self.jsonData = jsonData
 
   def getName(self):
     return self.jsonData["name"]

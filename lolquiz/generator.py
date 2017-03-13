@@ -1,4 +1,4 @@
-from lolapi import LolApi, RiotApiService, SummonerSpell
+from lolapi import LolApi, RiotApiService, SummonerSpell, Champion
 from flashcards import Card, CardStorage
 from filesystem import FileSystemService
 
@@ -31,7 +31,7 @@ class CardFactory(object):
 
   def createAllCards(self):
     """Creates all flash cards and saves them to disk as a JSON file."""
-    #self.createChampionAbilitiesCards()
+    self.createChampionAbilitiesCards()
     self.createSummonerSpellCards()
     self.flashcards.saveCards()
     return
@@ -39,17 +39,20 @@ class CardFactory(object):
   def createChampionAbilitiesCards(self):
     """Returns list of all champion ability cards"""
     championsList = self.lol.getChampions()
-    for champion in championsList:
-      card = ChampionAbilitiesCard(champion)
-      championsList.append(card)
-    return championsList
+    for champ in championsList:
+      abilities = champ.getAbilitiesAsStrings()
+      question = "What are {0}'s' abilities?".format(champ.getName())
+      answer = "Passive: {0}\\n\\nQ: {1}\\n\\nW: {2}\\n\\nE: {3}\\n\\nR: {4}\\n".format(abilities[0], abilities[1], abilities[2], abilities[3], abilities[4])
+      card = Card(question, answer, ["ChampionAbilities"])
+      self.flashcards.addCard(card)
+    return
 
   def createSummonerSpellCards(self):
     summonerSpells = self.lol.getSummonerSpells()
     for spell in summonerSpells:
       question = "What is the cooldown of {0}?".format(spell.getName())
       answer = spell.getCooldownString()
-      card = Card(question, answer, ["summonerSpell"])
+      card = Card(question, answer, ["SummonerSpell"])
       self.flashcards.addCard(card)
     return
 
