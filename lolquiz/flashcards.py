@@ -1,3 +1,4 @@
+import random
 import json
 from filesystem import FileSystemService
 
@@ -50,35 +51,85 @@ class CardStorage(object):
     cardsList.append(']')
     return "".join(cardsList)
 
+  def load(self):
+    cardsJson = self.fileSystemService.readJsonFile(self.CARD_FILE)
+    for c in cardsJson["flashcards"]:
+      card = Card(c["question"], c["answer"], c["categories"])
+      self.addCard(card)
+    if(len(self.cards) == 0):
+      raise Exception("No cards loaded.")
+    return
+
+  def drawRandomCard(self):
+    return self.cards[random.randint(0, len(self.cards) - 1)]
+
 class Quiz(object):
   """docstring for Quiz"""
-  def __init__(self, fileSystemService=None):
+  def __init__(self, fileSystemService=None, ioService=None):
     if(fileSystemService != None):
       self.fileSystemService = fileSystemService
     else:
       self.fileSystemService = FileSystemService()
 
+    if(ioService != None):
+      self.io = ioService
+    else:
+      self.io = IoService()
+
+    self.flashcards = CardStorage(self.fileSystemService)
+    self.counter = 0
+
   def loop(self):
     self.start()
 
-    continueQuiz = true
+    continueQuiz = True
     while (continueQuiz):
-      card = self.getCard()
+      self.counter += 1
+      card = self.flashcards.drawRandomCard()
+      self.io.printQuestion(card.question)
+      continueQuiz = self.io.waitForInput()
+      self.io.printAnswer(card.answer)
       
     self.end()
+    return
 
   def start(self):
-    # start quiz loop
-    pass
+    try:
+      self.flashcards.load()
+    except Exception as e:
+      print("Error loading flashcards.")
+      print(e)
+      raise e
+
+    self.io.printInfo("Found {0} flashcards to quiz from.".format(len(self.flashcards.cards)))
+    self.io.printInfo("Starting quiz.")
+    return
 
   def end(self):
     # end quiz loop
-    pass
+    self.io.printInfo("Quizzed on {0} flashcards.".format(self.counter))
+    return
 
-  def getCard(self):
-    # retun a quiz card
-    return Card("","",[])
+class IoService():
 
+  def printInfo(self, string):
+    print(string)
+    return
+
+  def printQuestion(self, string):
+    print(string)
+    return
+
+  def printAnswer(self, string):
+    print(string)
+    print("\n=======\n")
+    return
+
+  def waitForInput(self):
+    text = input()
+    if(text != ""):
+      return False
+    return True
 
 def main():
   quiz = Quiz()

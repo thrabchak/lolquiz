@@ -1,7 +1,6 @@
 import requests
 import json
 import datetime
-import os.path
 
 from filesystem import FileSystemService
 
@@ -36,6 +35,7 @@ class LolApi(object):
       return realmJson['dd']
     except Exception as e:
       print("Error reading realm file.")
+      print(e)
       return "-1"
 
   def isUpToDate(self):
