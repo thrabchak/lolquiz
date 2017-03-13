@@ -1,8 +1,9 @@
 import requests
-import tqdm
 import json
 import datetime
 import os.path
+
+from filesystem import FileSystemService
 
 class LolApi(object):
   """Class containing local lol api functions."""
@@ -23,27 +24,6 @@ class LolApi(object):
     else:
       self.apiService = RiotApiService(self.fileSystemService)
 
-  def getChampions(self):
-    '''Returns a list of all the active champions'''
-    try:
-      championJson = self.fileSystemService.readJsonFile(self.CHAMPION_FILE)
-      return championJson["data"]
-    except Exception as e:
-      print("Error reading champion data.")
-      return []
-
-  def getItems(self):
-    '''Returns a list of all the active items'''
-    return []
-
-  def getChampionAbilities(self, champion):
-    '''Returns a list of champion abilities'''
-    return []
-
-  def getSummonerSpells(self):
-    '''Returns a list of summoner spells'''
-    return []
-
   def getServerVersion(self):
     '''Returns the api version on data dragon'''
     data = self.apiService.realmRequest()
@@ -57,6 +37,10 @@ class LolApi(object):
     except Exception as e:
       print("Error reading realm file.")
       return "-1"
+
+  def isUpToDate(self):
+    '''Returns if the downloaded file versions match the server version'''
+    return self.getLocalVersion() == self.getServerVersion()
 
   def downloadDataFiles(self):
     '''Downloads lol api static data files'''
@@ -83,35 +67,45 @@ class LolApi(object):
     self.fileSystemService.saveJsonFile(data, self.SUMMONER_SPELL_FILE)
     return
 
-class FileSystemService(object):
-  """Class used to encapsulate file system calls."""
-  DATA_FOLDER_PATH="./data"
-  
-  def saveJsonFile(self, jsonData, filename):
-    with open(self.DATA_FOLDER_PATH + '/' + filename, 'w') as jsonFile:
-      json.dump(jsonData, jsonFile)
-    return
+  def getChampions(self):
+    '''Returns a list of all the active champions'''
+    try:
+      championJson = self.fileSystemService.readJsonFile(self.CHAMPION_FILE)
+      return championJson["data"]
+    except Exception as e:
+      print("Error reading champion data.")
+      return []
 
-  def readJsonFile(self, filename):
-    filePath = self.DATA_FOLDER_PATH + '/' + filename
-    if(os.path.exists(filePath)):
-      with open(filePath) as realmFile:
-        data = json.load(realmFile)
-      return data
-    else:
-      print("Error: " + filePath + " does not exist.")
-      raise Exception
-    return ""
+  def getItems(self):
+    '''Returns a list of all the active items'''
+    #TODO
+    return []
 
-  def readFile(self, filename):
-    with open(self.DATA_FOLDER_PATH + '/' + filename) as file:
-      fileString = file.read().strip()
-    return fileString
+  def getSummonerSpells(self):
+    '''Returns a list of summoner spells'''
+    data = self.fileSystemService.readJsonFile(self.SUMMONER_SPELL_FILE)
+    spells = []
+    for spell in data["data"]:
+      if("CLASSIC" in data["data"][spell]["modes"]):
+        summonerSpell = SummonerSpell(data["data"][spell])
+        spells.append(summonerSpell)
+    return spells
 
-  def appendFile(self, filename, data):      
-    with open(self.DATA_FOLDER_PATH + '/' + filename, 'a') as file:
-      file.write(data)
-    return
+class SummonerSpell(object):
+  def __init__(self, jsonData):
+    self.jsonData = jsonData
+
+  def getCooldown(self):
+    return self.jsonData["cooldown"][0]
+
+  def getCooldownString(self):
+    cooldown = self.getCooldown()
+    mins = int(cooldown // 60)
+    secs =  int(cooldown % 60)
+    return "{0} mins {1} secs".format(mins, secs) 
+
+  def getName(self):
+    return self.jsonData["name"]
 
 class RiotApiService():
   """Class used to encapsulate a https api call to riots static data api endpoint."""

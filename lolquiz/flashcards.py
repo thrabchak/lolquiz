@@ -1,23 +1,7 @@
-def createCard(question, answer, categories):
-  try:
-    card = Card(question, answer, categories)
-  except Exception as e:
-    print("Error creating card.")
-    raise e
-
-  try:
-    card.save()
-  except Exception as e:
-    print("Error saving card.")
-    raise e
-
-  return
+import json
+from filesystem import FileSystemService
 
 class Card(object):
-  """Base class for all Card types."""
-  self.question = ""
-  self.answer = ""
-  self.categories = []
 
   def __init__(self, question, answer, categories):
     self.question = question
@@ -26,19 +10,53 @@ class Card(object):
 
   def toJson(self):
     categoriesList = ['[']
-    for c in categories:
+    for c in self.categories:
       categoriesList.append('"' + c + '"')
       categoriesList.append(",")
-    categoriesList.pop()
+    if( len(categoriesList) > 1):
+      categoriesList.pop()
     categoriesList.append(']')
     categoriesString = ''.join(categoriesList)
-    return '{"question": "{0}", "answer":"{1}","categories":{2}}'.format(self.question, self.answer, self.categoriesString)
+    jsonString = '{{"question":"{0}","answer":"{1}","categories":{2}}}'.format(self.question, self.answer, categoriesString)
+    return jsonString
 
-  def save(self):
-    # Save flash card to default location
+class CardStorage(object):
+  CARD_FILE="flashcards.json"
+
+  def __init__(self, fileSystemService=None):
+    if(fileSystemService != None):
+      self.fileSystemService = fileSystemService
+    else:
+      self.fileSystemService = FileSystemService()
+
+    self.cards = []
+
+  def addCard(self, card):
+    self.cards.append(card)
+    return
+
+  def saveCards(self):
+    cardJson = json.loads('{"flashcards":' + self.createCardsJsonList() + '}')
+    self.fileSystemService.saveJsonFile(cardJson, self.CARD_FILE)
+    return
+
+  def createCardsJsonList(self):
+    cardsList = ['[']
+    for c in self.cards:
+      cardsList.append(c.toJson())
+      cardsList.append(",")
+    if( len(cardsList) > 1):
+      cardsList.pop()
+    cardsList.append(']')
+    return "".join(cardsList)
 
 class Quiz(object):
-  counter = 0
+  """docstring for Quiz"""
+  def __init__(self, fileSystemService=None):
+    if(fileSystemService != None):
+      self.fileSystemService = fileSystemService
+    else:
+      self.fileSystemService = FileSystemService()
 
   def loop(self):
     self.start()
@@ -51,7 +69,6 @@ class Quiz(object):
 
   def start(self):
     # start quiz loop
-
     pass
 
   def end(self):

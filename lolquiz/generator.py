@@ -1,28 +1,5 @@
-'''Third Party'''
-import json
-
-from abc import ABCMeta
-
-'''Internal'''
-import lolapi
-
-DEFAULT_SETTINGS_JSON = """
-{
-  "champion": {
-    "general_abilities": true,
-    "ability_cooldowns": false,
-  },
-  "items": {
-    "general_items": true
-  },
-  "summoner_spells": {
-    "cooldowns": true
-  },
-  "masteries": {
-    "descriptions" : true
-  }
-}
-"""
+from lolapi import LolApi
+from flashcards import Card, CardStorage
 
 class CardFactory(object):
   """Class used to create flash cards."""
