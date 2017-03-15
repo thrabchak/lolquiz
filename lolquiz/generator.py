@@ -33,6 +33,7 @@ class CardFactory(object):
     """Creates all flash cards and saves them to disk as a JSON file."""
     self.createChampionAbilitiesCards()
     self.createSummonerSpellCards()
+    self.createItemCards()
     self.flashcards.saveCards()
     return
 
@@ -41,9 +42,9 @@ class CardFactory(object):
     championsList = self.lol.getChampions()
     for champ in championsList:
       abilities = champ.getAbilitiesAsStrings()
-      question = "What are {0}'s' abilities?".format(champ.getName())
-      answer = "Passive: {0}\\n\\nQ: {1}\\n\\nW: {2}\\n\\nE: {3}\\n\\nR: {4}\\n".format(abilities[0], abilities[1], abilities[2], abilities[3], abilities[4])
-      card = Card(question, answer, ["ChampionAbilities"])
+      question = "What are {0}'s abilities?".format(champ.getName())
+      answer = r"Passive: {0}\n\nQ: {1}\n\nW: {2}\n\nE: {3}\n\nR: {4}\n".format(abilities[0], abilities[1], abilities[2], abilities[3], abilities[4])
+      card = Card(question, answer, ["Champion Abilities"])
       self.flashcards.addCard(card)
     return
 
@@ -52,7 +53,16 @@ class CardFactory(object):
     for spell in summonerSpells:
       question = "What is the cooldown of {0}?".format(spell.getName())
       answer = spell.getCooldownString()
-      card = Card(question, answer, ["SummonerSpell"])
+      card = Card(question, answer, ["Summoner Spells"])
+      self.flashcards.addCard(card)
+    return
+
+  def createItemCards(self):
+    items = self.lol.getItems()
+    for item in items:
+      question = "What is {0}?".format(item.getName())
+      answer = item.description()
+      card = Card(question, answer, ["Items"])
       self.flashcards.addCard(card)
     return
 

@@ -11,6 +11,7 @@ class LolApi(object):
   REALM_FILE='realm.json'
   CHAMPION_FILE="champion.json"
   SUMMONER_SPELL_FILE="summoner_spell.json"
+  ITEM_FILE="items.json"
 
   def __init__(self, fileSystemService=None, apiService=None):
     if(fileSystemService != None):
@@ -47,6 +48,7 @@ class LolApi(object):
     self.downloadRealmData()
     self.downloadChampionData()
     self.downloadSummonerSpellData()
+    self.downloadItemData()
     return
 
   def downloadRealmData(self):
@@ -67,6 +69,12 @@ class LolApi(object):
     self.fileSystemService.saveJsonFile(data, self.SUMMONER_SPELL_FILE)
     return
 
+  def downloadItemData(self):
+    '''Downloads the item data'''
+    data = self.apiService.itemRequest()
+    self.fileSystemService.saveJsonFile(data, self.ITEM_FILE)
+    return
+
   def getChampions(self):
     '''Returns a list of all the active champions'''
     try:
@@ -79,10 +87,21 @@ class LolApi(object):
       print("Error reading champion data.")
       print(e)
       raise e
+    return []
 
   def getItems(self):
     '''Returns a list of all the active items'''
-    #TODO
+    try:
+      itemJson = self.fileSystemService.readJsonFile(self.ITEM_FILE)
+      items = []
+      for itemKey, itemValue in itemJson["data"].items():
+        if(itemValue["maps"]["11"] and itemValue["gold"]["purchasable"]):
+          items.append(Item(itemValue))
+      return items
+    except Exception as e:
+      print("Error reading item data.")
+      print(e)
+      raise e
     return []
 
   def getSummonerSpells(self):
@@ -126,11 +145,11 @@ class Champion(object):
     return abilities
 
   def getAbilitiesAsStrings(self):
-
     abilities = self.getAbilities()
     stringList = []
     for ability in abilities:
-      stringList.append(ability.getName())
+      abilityString = r"{0}{1}\n{2}".format(ability.getName(), ability.getCooldownString(), ability.description())
+      stringList.append(abilityString)
     return stringList
 
   def getStats(self):
@@ -158,13 +177,42 @@ class Ability():
   def description(self):
     return str(self.jsonData["sanitizedDescription"])
 
+  def getCooldownString(self):
+
+    if("cooldown" not in self.jsonData.keys()):
+      return ""
+
+    cooldownList = self.jsonData["cooldown"] 
+    prefix = r"\nCooldown: "
+
+    allTheSame = True
+    for i in cooldownList:
+      if(i != cooldownList[0]):
+        allTheSame = False
+
+    if(allTheSame):
+      return prefix + str(cooldownList[0])
+
+    stringList = []
+    for i in cooldownList:
+      stringList.append(str(i))
+      stringList.append("/")
+    stringList.pop()
+    return prefix + "".join(stringList)
+
 class Item(object):
 
   def __init__(self, jsonData):
     self.jsonData = jsonData
 
   def getName(self):
-    return self.jsonData["name"]
+    return str(self.jsonData["name"])
+
+  def description(self):
+    return r"{0}\n\nCost: {1}".format(self.jsonData["sanitizedDescription"], self.getCost())
+
+  def getCost(self):
+    return self.jsonData["gold"]["total"]
 
 class RiotApiService():
   """Class used to encapsulate a https api call to riots static data api endpoint."""
@@ -210,6 +258,13 @@ class RiotApiService():
     self.logApiCall(r)
     data = r.json()
     return data
+
+  def itemRequest(self):
+    payload = {"api_key": self.apiKey, "itemListData": "all"}
+    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/item", params=payload)
+    self.logApiCall(r)
+    data = r.json()
+    return data    
 
   def logApiCall(self, response):
     '''Logs riot api calls locally in apiLog.txt'''

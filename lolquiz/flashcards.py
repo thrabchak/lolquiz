@@ -31,9 +31,17 @@ class CardStorage(object):
       self.fileSystemService = FileSystemService()
 
     self.cards = []
+    self.categories = {}
 
   def addCard(self, card):
     self.cards.append(card)
+
+    for category in card.categories:
+      if(category in self.categories.keys()):
+        self.categories[category].append(card)
+      else:
+        self.categories[category] = [card]
+
     return
 
   def saveCards(self):
@@ -60,8 +68,13 @@ class CardStorage(object):
       raise Exception("No cards loaded.")
     return
 
-  def drawRandomCard(self):
-    return self.cards[random.randint(0, len(self.cards) - 1)]
+  def drawRandomCard(self, categories=None):
+    if(categories == None or len(categories) < 1):
+      return self.cards[random.randint(0, len(self.cards) - 1)]
+    else:
+      randomCategory = random.randint(0, len(categories) - 1)
+      categoryCardList = self.categories[categories[randomCategory]]
+      return categoryCardList[random.randint(0, len(categoryCardList) - 1)]
 
 class Quiz(object):
   """docstring for Quiz"""
@@ -78,6 +91,7 @@ class Quiz(object):
 
     self.flashcards = CardStorage(self.fileSystemService)
     self.counter = 0
+    self.categories = []
 
   def loop(self):
     self.start()
@@ -85,9 +99,9 @@ class Quiz(object):
     continueQuiz = True
     while (continueQuiz):
       self.counter += 1
-      card = self.flashcards.drawRandomCard()
+      card = self.flashcards.drawRandomCard(self.categories)
       self.io.printQuestion(card.question)
-      continueQuiz = self.io.waitForInput()
+      continueQuiz = self.io.waitForContinueInput()
       self.io.printAnswer(card.answer)
       
     self.end()
@@ -102,7 +116,26 @@ class Quiz(object):
       raise e
 
     self.io.printInfo("Found {0} flashcards to quiz from.".format(len(self.flashcards.cards)))
-    self.io.printInfo("Starting quiz.")
+    categoriesList = self.flashcards.categories.keys()
+    if(len(categoriesList) > 0):
+      self.io.printInfo("Found {0} categories. Please choose one of the following:\n".format(len(categoriesList)))
+      self.io.printInfo("[]: All")
+      counter = 0
+      categoryKeyList = []
+      for key in categoriesList:
+        self.io.printInfo("[{0}]: {1}".format(counter, key))
+        counter += 1
+        categoryKeyList.append(key)
+      chosenInput = self.io.waitForInput()
+      if(chosenInput == ""):
+        self.io.printInfo("\nStarting quiz with all categories.\n")
+        return
+
+      if(int(chosenInput) in range(len(categoriesList))):
+        selectedCategory = categoryKeyList[int(chosenInput)]
+        self.categories.append(selectedCategory)
+        self.io.printInfo("\nStarting quiz in selected category - [{0}]: {1}\n".format(int(chosenInput), selectedCategory))
+
     return
 
   def end(self):
@@ -125,11 +158,14 @@ class IoService():
     print("\n=======\n")
     return
 
-  def waitForInput(self):
+  def waitForContinueInput(self):
     text = input()
     if(text != ""):
       return False
     return True
+
+  def waitForInput(self):
+    return input()
 
 def main():
   quiz = Quiz()
