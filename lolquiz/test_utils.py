@@ -44,6 +44,9 @@ class MockFileSystemService(FileSystemService):
     self.valueMap[filename].append(data)
     return
 
+  def exists(self, filename):
+    return filename in self.valueMap.keys()
+
 '''Sample API Request Values'''
 SAMPLE_REALM_JSON = '{"l": "en_US", "profileiconmax": 28, "cdn": "http://ddragon.leagueoflegends.com/cdn", "v": "7.4.3", "dd": "7.4.3", "css": "7.4.3", "n": {"summoner": "7.4.3", "rune": "7.4.3", "item": "7.4.3", "mastery": "7.4.3", "profileicon": "7.4.3", "language": "7.4.3", "champion": "7.4.3", "map": "7.4.3"}, "lg": "7.4.3"}'
 SAMPLE_CHAMPION_JSON = '''

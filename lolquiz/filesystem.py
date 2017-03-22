@@ -30,3 +30,7 @@ class FileSystemService(object):
     with open(self.DATA_FOLDER_PATH + '/' + filename, 'a') as file:
       file.write(data)
     return
+
+  def exists(self, filename):
+    filePath = self.DATA_FOLDER_PATH + '/' + filename
+    return os.path.exists(filePath)

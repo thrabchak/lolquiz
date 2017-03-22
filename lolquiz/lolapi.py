@@ -32,6 +32,8 @@ class LolApi(object):
   def getLocalVersion(self):
     '''Returns the api version of the downloaded files'''
     try:
+      if(not self.fileSystemService.exists(self.REALM_FILE)):
+        return -1
       realmJson = self.fileSystemService.readJsonFile(self.REALM_FILE)
       return realmJson['dd']
     except Exception as e:
@@ -95,7 +97,12 @@ class LolApi(object):
       itemJson = self.fileSystemService.readJsonFile(self.ITEM_FILE)
       items = []
       for itemKey, itemValue in itemJson["data"].items():
-        if(itemValue["maps"]["11"] and itemValue["gold"]["purchasable"]):
+        isOnSummonersRift = itemValue["maps"]["11"]
+        isPurchasable = itemValue["gold"]["purchasable"]
+        isInStore = True
+        if("inStore" in itemValue.keys()):
+          isInStore = itemValue["inStore"]
+        if(isOnSummonersRift and isPurchasable and isInStore):
           items.append(Item(itemValue))
       return items
     except Exception as e:
