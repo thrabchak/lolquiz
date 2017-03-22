@@ -76,6 +76,9 @@ class CardStorage(object):
       categoryCardList = self.categories[categories[randomCategory]]
       return categoryCardList[random.randint(0, len(categoryCardList) - 1)]
 
+  def count(self):
+    return len(self.cards)
+
 class Quiz(object):
   """docstring for Quiz"""
   def __init__(self, fileSystemService=None, ioService=None):

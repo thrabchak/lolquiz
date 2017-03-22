@@ -34,8 +34,7 @@ class CardFactory(object):
     self.createChampionAbilitiesCards()
     self.createSummonerSpellCards()
     self.createItemCards()
-    self.flashcards.saveCards()
-    return
+    return self.flashcards
 
   def createChampionAbilitiesCards(self):
     """Returns list of all champion ability cards"""
@@ -77,7 +76,8 @@ def main():
     exit(-1);
 
   try:
-    cardFactory.createAllCards()
+    cards = cardFactory.createAllCards()
+    cards.saveCards()
   except Exception as e:
     print("Error generating cards.")
     print(e)
