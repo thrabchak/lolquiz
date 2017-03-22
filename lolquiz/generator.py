@@ -2,8 +2,14 @@ from lolapi import LolApi, RiotApiService, SummonerSpell, Champion
 from flashcards import Card, CardStorage
 from filesystem import FileSystemService
 
+
 class CardFactory(object):
   """Class used to create flash cards."""
+
+  CHAMPION_ABILITIES_CATEGORY="Champion Abilities"
+  SUMMONER_SPELLS_CATEGORY="Summoner Spells"
+  ITEMS_CATEGORY="Items"
+
   def __init__(self, fileSystemService=None, riotApiService=None, flashcards=None):
     if(fileSystemService != None):
       self.fileSystemService = fileSystemService
@@ -43,7 +49,7 @@ class CardFactory(object):
       abilities = champ.getAbilitiesAsStrings()
       question = "What are {0}'s abilities?".format(champ.getName())
       answer = r"Passive: {0}\n\nQ: {1}\n\nW: {2}\n\nE: {3}\n\nR: {4}\n".format(abilities[0], abilities[1], abilities[2], abilities[3], abilities[4])
-      card = Card(question, answer, ["Champion Abilities"])
+      card = Card(question, answer, [self.CHAMPION_ABILITIES_CATEGORY])
       self.flashcards.addCard(card)
     return
 
@@ -52,7 +58,7 @@ class CardFactory(object):
     for spell in summonerSpells:
       question = "What is the cooldown of {0}?".format(spell.getName())
       answer = spell.getCooldownString()
-      card = Card(question, answer, ["Summoner Spells"])
+      card = Card(question, answer, [self.SUMMONER_SPELLS_CATEGORY])
       self.flashcards.addCard(card)
     return
 
@@ -61,7 +67,7 @@ class CardFactory(object):
     for item in items:
       question = "What is {0}?".format(item.getName())
       answer = item.description()
-      card = Card(question, answer, ["Items"])
+      card = Card(question, answer, [self.ITEMS_CATEGORY])
       self.flashcards.addCard(card)
     return
 

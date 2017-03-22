@@ -15,6 +15,7 @@ class Application(tornado.web.Application):
   def __init__(self):
     handlers = [
       (r"/", HomeHandler),
+      (r"/about", CardHandler),
       (r"/card", CardHandler),
     ]
     settings = dict(
@@ -45,6 +46,7 @@ class Application(tornado.web.Application):
       end = timer()
       print("Total: {0}".format(cards.count()))
       print("Time: {0}".format(end-start))
+      print("Categories: {0}".format(cards.validCategories()))
       return cards
     except Exception as e:
       print("Error generating cards.")
@@ -62,10 +64,22 @@ class HomeHandler(BaseHandler):
   def get(self):
     self.write("Home page")
 
+class AboutHandler(BaseHandler):
+  def get(self):
+    self.write("About page")
+
 class CardHandler(BaseHandler):
   def get(self):
-    card = self.cards.drawRandomCard()
-    self.write(card.question)
+    categories = []
+    if(self.get_arguments("champs")):
+      categories.append(CardFactory.CHAMPION_ABILITIES_CATEGORY)
+    if(self.get_arguments("items")):
+      categories.append(CardFactory.ITEMS_CATEGORY)
+    if(self.get_arguments("summs")):
+      categories.append(CardFactory.SUMMONER_SPELLS_CATEGORY)
+
+    card = self.cards.drawRandomCard(categories)
+    self.write(card.toJson())
 
 def main():
   tornado.options.parse_command_line()

@@ -79,6 +79,9 @@ class CardStorage(object):
   def count(self):
     return len(self.cards)
 
+  def validCategories(self):
+    return self.categories.keys()
+
 class Quiz(object):
   """docstring for Quiz"""
   def __init__(self, fileSystemService=None, ioService=None):
