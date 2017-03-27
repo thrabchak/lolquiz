@@ -20,8 +20,8 @@ class Application(tornado.web.Application):
     ]
     settings = dict(
         blog_title=u"LoL Flash Cards",
-        template_path=os.path.join(os.path.dirname(__file__), "templates"),
-        static_path=os.path.join(os.path.dirname(__file__), "static"),
+        template_path=os.path.join(os.path.dirname(__file__), "..", "templates"),
+        static_path=os.path.join(os.path.dirname(__file__), "..", "static"),
         debug=True,
     )
 
@@ -62,7 +62,7 @@ class BaseHandler(tornado.web.RequestHandler):
 
 class HomeHandler(BaseHandler):
   def get(self):
-    self.write("Home page")
+    self.render("base.html", title="LoL Flash Cards")
 
 class AboutHandler(BaseHandler):
   def get(self):
