@@ -1,0 +1,18 @@
+.center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#card {
+  background: #155799;
+  text-align: center;
+}
+#flip_button {
+  margin: 1em;
+  width: 50%;
+}
+
+.nav_button {
+  height: 100%;
+}
