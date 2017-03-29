@@ -15,7 +15,7 @@ class Application(tornado.web.Application):
   def __init__(self):
     handlers = [
       (r"/", HomeHandler),
-      (r"/about", CardHandler),
+      (r"/about", AboutHandler),
       (r"/card", CardHandler),
     ]
     settings = dict(
