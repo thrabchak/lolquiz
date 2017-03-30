@@ -9,8 +9,6 @@ from tornado.options import define, options
 from generator import CardFactory
 from flashcards import CardStorage
 
-define("port", default=5000, help="run on the given port", type=int)
-
 class Application(tornado.web.Application):
   def __init__(self):
     handlers = [
@@ -84,7 +82,8 @@ class CardHandler(BaseHandler):
 def main():
   tornado.options.parse_command_line()
   http_server = tornado.httpserver.HTTPServer(Application())
-  http_server.listen(options.port)
+  port = int(os.environ.get("PORT", 5000))
+  http_server.listen(port)
   try:
     tornado.ioloop.IOLoop.instance().start()
   except KeyboardInterrupt:
