@@ -15,6 +15,7 @@ LolQuiz.ClientApp.prototype = {
     document.getElementById("flip_button").addEventListener("click", function() {that.flip();});
     document.getElementById("next_button").addEventListener("click", function() {that.next();});
     document.getElementById("prev_button").addEventListener("click", function() {that.prev();});
+    window.addEventListener("keydown", function(e) {that.keyEvent(e)});
   },
 
   drawRandomCard: function() {
@@ -54,6 +55,33 @@ LolQuiz.ClientApp.prototype = {
       this.showCard(this.current+1);
     } else {
       this.drawRandomCard();
+    }
+  },
+
+  keyEvent: function(e) {
+    var keyValue = e.keyCode;
+    if([32, 37, 38, 39, 40].indexOf(keyValue) > -1) {
+        e.preventDefault();
+    }
+    switch(keyValue) {
+      case 13: // 13 is Enter
+      case 32: // 32 is spacebar
+        if(this.showingFront)
+          this.flip();
+        else
+          this.next();
+        break;
+      case 37: // 37 is left
+        this.prev();
+        break;
+      case 38: // 38 is up
+        break;
+      case 39: // 39 is right
+        this.next();
+        break;
+      case 40: // 40 is down
+        this.flip();
+        break;
     }
   }
 
