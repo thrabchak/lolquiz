@@ -37,3 +37,6 @@ class FileSystemService(object):
   def exists(self, filename):
     filePath = os.path.join(self.DATA_FOLDER_PATH, filename)
     return os.path.exists(filePath)
+
+  def getEnv(self, envName):
+    return os.getenv(envName, "")

@@ -234,6 +234,7 @@ class RiotApiService():
   REGION="/na"
   API_VERSION="/v1.2"
   API_KEY_FILE="riot_api_key.txt"
+  API_KEY_ENV="RIOT_API_KEY"
   API_LOG_FILE="api_log.txt"
 
   def __init__(self, fileSystemService=None):
@@ -247,9 +248,9 @@ class RiotApiService():
   def getApiKey(self):
     '''Returns the riot api key stored in API_KEY_FILE'''
     try:
-      return self.fileSystemService.readFile(self.API_KEY_FILE)
+      return self.fileSystemService.getEnv(self.API_KEY_ENV)
     except Exception as e:
-      print("Error reading LoL Api key file.")
+      print("Error reading RIOT_API_KEY env.")
       raise e
 
   def realmRequest(self):
