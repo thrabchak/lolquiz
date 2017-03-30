@@ -93,16 +93,20 @@ class LolApi(object):
 
   def getItems(self):
     '''Returns a list of all the active items'''
+    excludedItems = frozenset([
+      3635 # Port pad
+      ])
     try:
       itemJson = self.fileSystemService.readJsonFile(self.ITEM_FILE)
       items = []
       for itemKey, itemValue in itemJson["data"].items():
         isOnSummonersRift = itemValue["maps"]["11"]
         isPurchasable = itemValue["gold"]["purchasable"]
+        isExcluded = (int(itemKey) in excludedItems)
         isInStore = True
         if("inStore" in itemValue.keys()):
           isInStore = itemValue["inStore"]
-        if(isOnSummonersRift and isPurchasable and isInStore):
+        if(isOnSummonersRift and isPurchasable and isInStore and not isExcluded):
           items.append(Item(itemValue))
       return items
     except Exception as e:
@@ -217,6 +221,9 @@ class Item(object):
 
   def description(self):
     return r"{0}\n\nCost: {1}".format(self.jsonData["sanitizedDescription"], self.getCost())
+
+  def html(self):
+    return r"{0}<br><br>Cost: {1}".format(self.jsonData["description"], self.getCost())
 
   def getCost(self):
     return self.jsonData["gold"]["total"]
