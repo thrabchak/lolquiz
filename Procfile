@@ -1,1 +1,1 @@
-web: python lolquiz\server.py
+web: python lolquiz/server.py
