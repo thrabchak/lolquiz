@@ -51,5 +51,4 @@ class FileSystemService(object):
   def ensureDataDir(self):
     directory = os.path.abspath(self.DATA_FOLDER_PATH)
     if not os.path.exists(directory):
-      print("making data dir")
       os.makedirs(directory)

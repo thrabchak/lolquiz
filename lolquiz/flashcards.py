@@ -83,7 +83,7 @@ class CardStorage(object):
     return self.categories.keys()
 
 class Quiz(object):
-  """docstring for Quiz"""
+  """Command line based flash card quizzer."""
   def __init__(self, fileSystemService=None, ioService=None):
     if(fileSystemService != None):
       self.fileSystemService = fileSystemService

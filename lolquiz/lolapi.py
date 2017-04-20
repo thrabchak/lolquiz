@@ -163,6 +163,14 @@ class Champion(object):
       stringList.append(abilityString)
     return stringList
 
+  def getAbilitiesAsHtml(self):
+    abilities = self.getAbilities()
+    stringList = []
+    for ability in abilities:
+      abilityString = "{0}{1}<br>{2}".format(ability.getName(), ability.getCooldownString(isHtml=True), ability.description())
+      stringList.append(abilityString)
+    return stringList
+
   def getStats(self):
     return self.jsonData["stats"]
 
@@ -188,13 +196,17 @@ class Ability():
   def description(self):
     return str(self.jsonData["sanitizedDescription"])
 
-  def getCooldownString(self):
+  def getCooldownString(self, isHtml=False):
 
     if("cooldown" not in self.jsonData.keys()):
       return ""
 
     cooldownList = self.jsonData["cooldown"] 
-    prefix = r"\nCooldown: "
+
+    if(isHtml):
+      prefix = "<br>Cooldown: "
+    else:
+      prefix = "\nCooldown: "
 
     allTheSame = True
     for i in cooldownList:

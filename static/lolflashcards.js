@@ -30,16 +30,16 @@ LolQuiz.ClientApp.prototype = {
   showCard: function(i) {
     this.current = i;
     var card = this.cards[i];
-    this.textElem.textContent = card.question;
+    this.textElem.innerHTML = card.question;
     this.showingFront = true;
   },
 
   flip: function() {
     if(this.showingFront) {
-      this.textElem.textContent = this.cards[this.current].answer;
+      this.textElem.innerHTML = this.cards[this.current].answer;
       this.showingFront = false;
     } else {
-      this.textElem.textContent = this.cards[this.current].question;
+      this.textElem.innerHTML = this.cards[this.current].question;
       this.showingFront = true;
     }
   },
@@ -75,12 +75,15 @@ LolQuiz.ClientApp.prototype = {
         this.prev();
         break;
       case 38: // 38 is up
+        if(!this.showingFront)
+          this.flip()
         break;
       case 39: // 39 is right
         this.next();
         break;
       case 40: // 40 is down
-        this.flip();
+        if(this.showingFront)
+          this.flip();
         break;
     }
   }

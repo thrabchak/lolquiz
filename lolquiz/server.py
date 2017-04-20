@@ -6,7 +6,7 @@ import tornado.web
 from timeit import default_timer as timer
 from tornado.options import define, options
 
-from generator import CardFactory
+from generator import HtmlCardFactory
 from flashcards import CardStorage
 
 class Application(tornado.web.Application):
@@ -24,12 +24,18 @@ class Application(tornado.web.Application):
     )
 
     super(Application, self).__init__(handlers, **settings)
-    self.cards = self.createFlashcards()
+
+    self.cards = self.loadFlashCards()
+
+  def loadFlashCards(self):
+    cardStorage = CardStorage()
+    cardStorage.load()
+    return cardStorage
 
   def createFlashcards(self):
     start = timer()
 
-    cardFactory = CardFactory()
+    cardFactory = HtmlCardFactory()
 
     try:
       cardFactory.updateData()
@@ -70,11 +76,11 @@ class CardHandler(BaseHandler):
   def get(self):
     categories = []
     if(self.get_arguments("champs")):
-      categories.append(CardFactory.CHAMPION_ABILITIES_CATEGORY)
+      categories.append(HtmlCardFactory.CHAMPION_ABILITIES_CATEGORY)
     if(self.get_arguments("items")):
-      categories.append(CardFactory.ITEMS_CATEGORY)
+      categories.append(HtmlCardFactory.ITEMS_CATEGORY)
     if(self.get_arguments("summs")):
-      categories.append(CardFactory.SUMMONER_SPELLS_CATEGORY)
+      categories.append(HtmlCardFactory.SUMMONER_SPELLS_CATEGORY)
 
     card = self.cards.drawRandomCard(categories)
     self.write(card.toJson())

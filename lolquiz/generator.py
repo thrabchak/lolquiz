@@ -1,3 +1,5 @@
+import argparse
+
 from lolapi import LolApi, RiotApiService, SummonerSpell, Champion
 from flashcards import Card, CardStorage
 from filesystem import FileSystemService
@@ -71,8 +73,50 @@ class CardFactory(object):
       self.flashcards.addCard(card)
     return
 
+class HtmlCardFactory(CardFactory):
+  """This class behaves very much like CardFactory, except that it stores the question and answer as html
+  instead of plain text"""
+
+  def createChampionAbilitiesCards(self):
+    """Returns list of all champion ability cards"""
+    championsList = self.lol.getChampions()
+    for champ in championsList:
+      abilities = champ.getAbilitiesAsHtml()
+      question = "What are {0}'s abilities?".format(champ.getName())
+      answer = "Passive: {0}<br><br>Q: {1}<br><br>W: {2}<br><br>E: {3}<br><br>R: {4}<br><br>".format(abilities[0], abilities[1], abilities[2], abilities[3], abilities[4])
+      card = Card(question, answer, [self.CHAMPION_ABILITIES_CATEGORY])
+      self.flashcards.addCard(card)
+    return
+
+  def createSummonerSpellCards(self):
+    summonerSpells = self.lol.getSummonerSpells()
+    for spell in summonerSpells:
+      question = "What is the cooldown of {0}?".format(spell.getName())
+      answer = spell.getCooldownString()
+      card = Card(question, answer, [self.SUMMONER_SPELLS_CATEGORY])
+      self.flashcards.addCard(card)
+    return
+
+  def createItemCards(self):
+    items = self.lol.getItems()
+    for item in items:
+      question = "What is {0}?".format(item.getName())
+      answer = item.html()
+      card = Card(question, answer, [self.ITEMS_CATEGORY])
+      self.flashcards.addCard(card)
+    return
+
 def main():
-  cardFactory = CardFactory()
+  parser = argparse.ArgumentParser(description="Generates Leauge of Legends flashcards and stores them in a json file.")
+  parser.add_argument("--html", help="Generates html cards instead of plain text cards.",
+                    action="store_true")
+  args = parser.parse_args()
+
+  if(args.html):
+    cardFactory = HtmlCardFactory()
+    print("Generating HTML flashcards.")
+  else:
+    cardFactory = CardFactory()
 
   try:
     cardFactory.updateData()
