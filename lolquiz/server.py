@@ -65,16 +65,10 @@ class Application(tornado.web.Application):
       exit(-1)
 
     try:
-      import time
-      print("Creating cards")
-      time.sleep(10)
       self.cardsLock.acquire()
-      print("Setting cards")
-      time.sleep(10)
       self.cards = cards
     finally:
       self.cardsLock.release()
-      print("Finished setting")
     return None
 
 class BaseHandler(tornado.web.RequestHandler):
