@@ -3,6 +3,8 @@ import tornado.httpserver
 import tornado.ioloop
 import tornado.web
 
+import threading
+
 from timeit import default_timer as timer
 from tornado.options import define, options
 
@@ -25,7 +27,12 @@ class Application(tornado.web.Application):
 
     super(Application, self).__init__(handlers, **settings)
 
+    # Load existing flashcards
     self.cards = self.loadFlashCards()
+
+    # Asynchronously create new flashcards
+    t = threading.Thread(name="create_new_cards", target=self.createFlashcards)
+    t.start()
 
   def loadFlashCards(self):
     cardStorage = CardStorage()
@@ -51,12 +58,12 @@ class Application(tornado.web.Application):
       print("Total: {0}".format(cards.count()))
       print("Time: {0}".format(end-start))
       print("Categories: {0}".format(cards.validCategories()))
-      return cards
     except Exception as e:
       print("Error generating cards.")
       print(e)
       exit(-1)
 
+    self.cards = cards
     return None
 
 class BaseHandler(tornado.web.RequestHandler):

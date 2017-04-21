@@ -1,3 +1,8 @@
 __pycache__/
 .cache/
-data/
+
+data/api_log.txt
+data/champion.json
+data/items.json
+data/realm.json
+data/summoner_spell.json
