@@ -31,6 +31,7 @@ class Application(tornado.web.Application):
     self.cards = self.loadFlashCards()
 
     # Asynchronously create new flashcards
+    self.cardsLock = threading.Lock()
     t = threading.Thread(name="create_new_cards", target=self.createFlashcards)
     t.start()
 
@@ -63,13 +64,27 @@ class Application(tornado.web.Application):
       print(e)
       exit(-1)
 
-    self.cards = cards
+    try:
+      import time
+      print("Creating cards")
+      time.sleep(10)
+      self.cardsLock.acquire()
+      print("Setting cards")
+      time.sleep(10)
+      self.cards = cards
+    finally:
+      self.cardsLock.release()
+      print("Finished setting")
     return None
 
 class BaseHandler(tornado.web.RequestHandler):
   @property
   def cards(self):
     return self.application.cards
+
+  @property
+  def cardsLock(self):
+    return self.application.cardsLock
 
 class HomeHandler(BaseHandler):
   def get(self):
@@ -89,7 +104,12 @@ class CardHandler(BaseHandler):
     if(self.get_arguments("summs")):
       categories.append(HtmlCardFactory.SUMMONER_SPELLS_CATEGORY)
 
-    card = self.cards.drawRandomCard(categories)
+    try:
+      self.cardsLock.acquire()
+      card = self.cards.drawRandomCard(categories)
+    finally:
+      self.cardsLock.release()
+
     self.write(card.toJson())
 
 def main():
