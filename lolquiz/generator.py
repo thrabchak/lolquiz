@@ -34,22 +34,25 @@ class CardFactory(object):
     """Ensures that we have the latest LoL data downloaded."""
     # see if we already have static data downloaded. if not, download
     if(not self.lol.isUpToDate()):
+      print("Not up to date")
       self.lol.downloadDataFiles()
     return
 
   def createAllCards(self):
     """Creates all flash cards and saves them to disk as a JSON file."""
     self.createChampionAbilitiesCards()
-    self.createSummonerSpellCards()
-    self.createItemCards()
+    # self.createSummonerSpellCards()
+    # self.createItemCards()
     return self.flashcards
 
   def createChampionAbilitiesCards(self):
     """Returns list of all champion ability cards"""
     championsList = self.lol.getChampions()
     for champ in championsList:
-      abilities = champ.getAbilitiesAsStrings()
-      question = "What are {0}'s abilities?".format(champ.getName())
+      print(champ.getName())
+      detailedChamp = self.lol.getChampion(champ.jsonData["id"])
+      abilities = detailedChamp.getAbilitiesAsStrings()
+      question = "What are {0}'s abilities?".format(detailedChamp.getName())
       answer = r"Passive: {0}\n\nQ: {1}\n\nW: {2}\n\nE: {3}\n\nR: {4}\n".format(abilities[0], abilities[1], abilities[2], abilities[3], abilities[4])
       card = Card(question, answer, [self.CHAMPION_ABILITIES_CATEGORY])
       self.flashcards.addCard(card)
@@ -127,6 +130,7 @@ def main():
 
   try:
     cards = cardFactory.createAllCards()
+    print('saving')
     cards.saveCards()
   except Exception as e:
     print("Error generating cards.")

@@ -10,7 +10,7 @@ class LolApi(object):
   '''File name Constants'''
   REALM_FILE='realm.json'
   CHAMPION_FILE="champion.json"
-  SUMMONER_SPELL_FILE="summoner_spell.json"
+  SUMMONER_SPELL_FILE="summoner.json"
   ITEM_FILE="items.json"
 
   def __init__(self, fileSystemService=None, apiService=None):
@@ -63,6 +63,10 @@ class LolApi(object):
     '''Downloads the champion data'''
     data = self.apiService.championRequest()
     self.fileSystemService.saveJsonFile(data, self.CHAMPION_FILE)
+
+    for champ in self.getChampions():
+      data = self.apiService.specificChampionRequest(champ.jsonData['id'])
+      self.fileSystemService.saveJsonFile(data, champ.jsonData['id']+".json")
     return
 
   def downloadSummonerSpellData(self):
@@ -90,6 +94,18 @@ class LolApi(object):
       print(e)
       raise e
     return []
+
+  def getChampion(self, id):
+    '''Returns the champion'''
+    try:
+      championJson = self.fileSystemService.readJsonFile(id + ".json")
+      for champKey, champValue in championJson["data"].items():
+        return Champion(champValue)
+    except Exception as e:
+      print("Error reading champion data.")
+      print(e)
+      raise e
+    return None
 
   def getItems(self):
     '''Returns a list of all the active items'''
@@ -194,7 +210,7 @@ class Ability():
     return self.jsonData["name"]
 
   def description(self):
-    return str(self.jsonData["sanitizedDescription"])
+    return str(self.jsonData["description"])
 
   def getCooldownString(self, isHtml=False):
 
@@ -242,9 +258,9 @@ class Item(object):
 
 class RiotApiService():
   """Class used to encapsulate a https api call to riots static data api endpoint."""
-  BASE_API_URL="https://global.api.pvp.net/api/lol/static-data"
-  REGION="/na"
-  API_VERSION="/v1.2"
+  BASE_API_URL="https://ddragon.leagueoflegends.com"
+  REGION=""
+  API_VERSION="/cdn/11.5.1/data/en_US"
   API_KEY_FILE="riot_api_key.txt"
   API_KEY_ENV="RIOT_API_KEY"
   API_LOG_FILE="api_log.txt"
@@ -255,40 +271,48 @@ class RiotApiService():
     else:
       self.fileSystemService = FileSystemService()
 
-    self.apiKey = self.getApiKey()
+    self.apiKey = ""
 
   def getApiKey(self):
     '''Returns the riot api key stored in API_KEY_FILE'''
     try:
-      return self.fileSystemService.getEnv(self.API_KEY_ENV)
+      return self.apiKey#self.fileSystemService.getEnv(self.API_KEY_ENV)
     except Exception as e:
       print("Error reading RIOT_API_KEY env.")
       raise e
 
   def realmRequest(self):
     payload = {"api_key": self.apiKey}
-    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/realm", params=payload)
+    r = requests.get(self.BASE_API_URL + "/realms/na.json")
     self.logApiCall(r)
     data = r.json()
+
     return data
 
   def championRequest(self):
     payload = {"api_key": self.apiKey, "champData": "all"}
-    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/champion", params=payload)
+    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/champion.json")
+    self.logApiCall(r)
+    data = r.json()
+    return data
+
+  def specificChampionRequest(self, id):
+    payload = {"api_key": self.apiKey, "champData": "all"}
+    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/champion/" + id + ".json")
     self.logApiCall(r)
     data = r.json()
     return data
 
   def summonerSpellRequest(self):
     payload = {"api_key": self.apiKey, "spellData": "all"}
-    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/summoner-spell", params=payload)
+    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/summoner.json")
     self.logApiCall(r)
     data = r.json()
     return data
 
   def itemRequest(self):
     payload = {"api_key": self.apiKey, "itemListData": "all"}
-    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/item", params=payload)
+    r = requests.get(self.BASE_API_URL + self.REGION + self.API_VERSION + "/item.json")
     self.logApiCall(r)
     data = r.json()
     return data    

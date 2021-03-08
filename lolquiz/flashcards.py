@@ -18,7 +18,11 @@ class Card(object):
       categoriesList.pop()
     categoriesList.append(']')
     categoriesString = ''.join(categoriesList)
+    # print(self.question)
+    # print(self.answer)
+    # print(categoriesString)
     jsonString = '{{"question":"{0}","answer":"{1}","categories":{2}}}'.format(self.question, self.answer, categoriesString)
+    # print(jsonString)
     return jsonString
 
 class CardStorage(object):
@@ -45,7 +49,8 @@ class CardStorage(object):
     return
 
   def saveCards(self):
-    cardJson = json.loads('{"flashcards":' + self.createCardsJsonList() + '}')
+    l = self.createCardsJsonList()
+    cardJson = json.loads('{"flashcards":' + l + '}', strict=False)
     self.fileSystemService.saveJsonFile(cardJson, self.CARD_FILE)
     return
 
@@ -54,6 +59,8 @@ class CardStorage(object):
     for c in self.cards:
       cardsList.append(c.toJson())
       cardsList.append(",")
+    cardsList.append(c.toJson())
+    cardsList.append(",")
     if( len(cardsList) > 1):
       cardsList.pop()
     cardsList.append(']')
